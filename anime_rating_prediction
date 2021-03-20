@@ -1,0 +1,427 @@
+#importing the dataset into Rstudio
+#attached the dataset
+Anime_Final <-read.csv("C:/Users/India/Desktop/Anime_Final/Anime_Final.csv
+                       ")
+View(Anime_Final)
+attach(Anime_Final
+       )
+summary(Anime_Final
+        )
+#identifying the nature of each variable
+summary(mediaType)
+summary(mediaType)
+Length     Class      Mode 
+7029 character character
+#so the column mediaType is categorical in nature
+#nature of eps column
+
+summary(eps)
+Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+1.000   1.000   1.000   8.382  12.000 951.000 
+#the column eps is quantitative in nature
+summary(duration)
+Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   1.00    3.00    5.00   18.73   23.00  163.00    1696 
+   
+   #the column duration is quantitative in nature it has 1696 missing values
+   summary(ongoing)
+   Length     Class      Mode 
+     7029 character character
+     #the column ongoing is categorica in nature
+ summary(sznOfRelease)
+   Length     Class      Mode 
+     7029 character character
+     #season Of release column in categorical in nature
+     summary(description)
+   Length     Class      Mode 
+     7029 character character
+     #the column description is qualitative in nature and there are unique values'
+  summary(studios
+          )
+#the variable studios is also qualitative in nature 
+summary(tags)
+Length     Class      Mode 
+7029 character character
+#the column tags is qualitative in nature
+summary(contentWarn)
+Length     Class      Mode 
+7029 character character
+#the column content warning is categorical in nature 
+summary(watched)
+Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+     0.0     55.0    385.5   3364.3   2737.0 161567.0       87
+     #the column watched is quantitative in nature it has 87 missing values.
+ 
+   summary(watching)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    0.0     2.0    17.0   331.3   132.0 69004.0
+    #the column 'watching' is quantitative in nature 
+    summary(wantWatch)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0      41     333    1453    1618   28541 
+      #the column wantWatch is quantitative in nature. 
+      summary(dropped)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    0.0     2.0    10.0   151.3    58.0 12813.0 
+    #the column dropped is quantitative in nature.
+    summary(rating)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.924   2.276   3.148   3.050   3.828   4.702 
+  #the column rating is quantitative in nature.
+  summary(votes)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+     10      34     252    2479    1874  131067 
+     #the column votes is quantitative in nature.
+     #to remove the columns studios and contentWarn because there are missing values >30%
+     so we drop both these columns.
+      df2 <- Anime_Final[!names(Anime_Final) %in% c("studios","contentWarn")]
+      View(df2)
+    df2 <- Anime_Final[!names(Anime_Final) %in% c("studios","contentWarn","sznOfRelease")]
+    #deleting the column sznOfRealease since it has too many missing values
+#to find the mode of the column duration calculated the mode using excel 
+mode=4
+#replaced the na values in duration column with the modal value=4 using
+  df2$duration = ifelse(is.na(df2$duration),4,df2$duration)
+  df2
+df2$duration = as.numeric(df2$duration)
+> summary(df2$duration)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   1.00    4.00    4.00   15.18   13.00  163.00  
+  
+#checking for outliers :
+boxplot
+boxplot(df2$watched, horizontal= T, main="Boxplot for Watched")
+boxplot(df2$watched, horizontal= T, main="Boxplot for Watched")
+> boxplot(df2$watching, horizontal= T, main="Boxplot for watching")
+> boxplot(df2$wantWatch, horizontal= T, main="Boxplot for wantWatch")
+> boxplot(df2$dropped, horizontal =T, main = "Boxplot for dropped")
+> boxplot(df2$rating, horizontal =T, main= "Boxplot for rating")
+>  boxplot(df2$eps,horizontal = T, main= "Boxplot for episodes")
+> boxplot(df2$votes, horizontal = T,main= "Boxplot of votes")
+
+#only ratings which is a quantitative variable has no outliers 
+
+treatment for eps variable:
+
+ quantiles=quantile(df2$eps,c(0.95,0.96,0.963,0.965,0.97,0.98,0.99,0.995, na.rm=T))
+> quantiles
+   95%    96%  96.3%  96.5%    97%    98%    99%  99.5%   100% 
+ 26.00  30.00  33.00  37.02  40.00  51.00  60.00 104.00 951.00 
+ quantiles_final=quantile(df2$eps,0.995,na.rm=TRUE)
+> quantiles_final
+99.5% 
+  104  
+ max(df2$eps)
+[1] 951
+> 
+ #treatment of the variable duration
+   boxplot(df2$duration,horizontal = T, main="Boxplot of duration")
+> quantiles=quantile(df2$duration, c(0.95,0.96,0.963,0.965,0.97,0.98,0.99,0.995), na.rm = TRUE)
+> quantiles
+  95%   96% 96.3% 96.5%   97%   98%   99% 99.5% 
+   90    95    96    97   100   106   115   120 
+ quantiles_final=quantile(df2$duration, 0.995, na.rm=TRUE)
+quantiles_final
+99.5% 
+  120 
+ max(df2$duration)
+[1] 163
+
+Treating the missing values in watched and watching column with the mean
+df2$watched[is.na(df2$watched)] <- mean(df2$watched, na.rm=TRUE)
+> round(df2$watched)
+df2$watching[is.na(df2$watching)] <- mean(df2$watching, na.rm = TRUE)
+> round(df2$watching)
+model <- lm(rating~duration+watched+watching+wantWatch+dropped+votes, data = df2)
+> summary(model)
+
+Call:
+lm(formula = rating ~ duration + watched + watching + wantWatch + 
+    dropped + votes, data = df2)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.53364 -0.53505  0.06491  0.55807  2.91272 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  2.628e+00  1.133e-02  232.01   <2e-16 ***
+duration     7.159e-03  3.470e-04   20.63   <2e-16 ***
+watched      1.770e-04  1.257e-05   14.08   <2e-16 ***
+watching     1.526e-04  1.242e-05   12.29   <2e-16 ***
+wantWatch    2.340e-04  6.682e-06   35.02   <2e-16 ***
+dropped      1.718e-06  4.338e-05    0.04    0.968    
+votes       -2.711e-04  1.806e-05  -15.01   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.7131 on 6739 degrees of freedom
+  (283 observations deleted due to missingness)
+Multiple R-squared:  0.3892,	Adjusted R-squared:  0.3886 
+F-statistic: 715.6 on 6 and 6739 DF,  p-value: < 2.2e-16
+ plot(rating,(watching))
+> plot(rating,votes)
+>plot(rating,wantWatch)
+ fit1 <- lm(rating~mediaType, data = df2)
+> fit1
+
+Call:
+lm(formula = rating ~ mediaType, data = df2)
+
+Coefficients:
+         (Intercept)  mediaTypeDVD Special        mediaTypeMovie  mediaTypeMusic Video        mediaTypeOther  
+            3.103733              0.008232              0.347838             -0.660764             -0.605812  
+        mediaTypeOVA           mediaTypeTV   mediaTypeTV Special          mediaTypeWeb  
+            0.322262              0.387838              0.185421             -0.598855  
+
+> fit2 <- lm(formula= rating ~ eps, data= df2)
+> fit2
+
+Call:
+lm(formula = rating ~ eps, data = df2)
+
+Coefficients:
+(Intercept)          eps  
+   3.022176     0.003268  
+
+> fit <- lm(formula = rating ~duration, data = df2)
+> fit
+
+Call:
+lm(formula = rating ~ duration, data = df2)
+
+Coefficients:
+(Intercept)     duration  
+   2.903625     0.009616  
+
+#correlation coefficients of different possible independant variable
+cor(rating,dropped, method = "pearson", use = "complete.obs" )
+[1] 0.3066994
+> cor(rating, watched, method = "pearson", use = "complete.obs")
+[1] 0.4239112
+> cor(rating,watching, method = "pearson", use = "complete.obs")
+[1] 0.2640775
+> cor(rating,wantWatch, method = "pearson", use = "complete.obs")
+[1] 0.5459141
+> cor(rating,votes, method = "pearson", use ="complete.obs")
+[1] 0.4067084
+
+#scatter plot of rating along with variables "watched" and "watching"
+>ggscatter(df2, x= "rating", y= "watching", cor.coef = TRUE, cor.method = "pearson")
+> ggscatter(df2, x="rating", y="watched", cor.coef = TRUE, cor.method = "pearson")
+
+so, using MLRM we can obtain the model since independant variables watched,wantWatch and votes have he highest correlation with rating
+model <- lm(rating~mediaType, data= df2)
+> View(model)
+> summary(model)
+#checking for ANOVA test between categorical variables and target variable so see the viability of the test
+library(dplyr)
+> group_by(df2,mediaType ) %>%
++   summarise(
++     count = n(),
++     mean = mean(rating, na.rm = TRUE),
++     sd = sd(rating, na.rm = TRUE)
++   )
+For eps column
+>df2$eps[df2$eps>=150]= 150
+
+#ANOVA test for rating and tags relation
+
+library(dplyr)
+> group_by(df2,tags ) %>%
++   summarise(
++     count = n(),
++     mean = mean(rating, na.rm = TRUE),
++     sd = sd(rating, na.rm = TRUE)
++   )
+#Anova test for  
+res.aov <- aov(rating ~ watched, data = df2)
+> summary(res.aov)
+              Df Sum Sq Mean Sq F value Pr(>F)    
+watched        1   1027  1027.1    1515 <2e-16 ***
+Residuals   7027   4763     0.7                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+res.aov <- aov(rating ~ wantWatch, data = df2)
+> summary(res.aov)
+              Df Sum Sq Mean Sq F value Pr(>F)    
+wantWatch      1   1726  1725.7    2983 <2e-16 ***
+Residuals   7027   4065     0.6                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+res.aov1 <- aov(rating~ watching, data=df2)
+> summary(res.aov1)
+              Df Sum Sq Mean Sq F value Pr(>F)    
+watching       1    404   403.8   526.8 <2e-16 ***
+Residuals   7027   5387     0.8                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+> 
+#anova test for rating and votes 
+ res.aov3 <- aov(rating~ votes, data=df2)
+> summary(res.aov3)
+              Df Sum Sq Mean Sq F value Pr(>F)    
+votes          1    958   957.8    1393 <2e-16 ***
+Residuals   7027   4833     0.7                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+      
+#Splitting the dataset into train and test data with 70% train and 30% test  splitting     
+      
+ library(caTools)
+> data1= sample.split(df2,SplitRatio = 0.3)
+> train =subset(df2,data1==TRUE)
+> test =subset(df2,data1==FALSE)  
+
+#foriming the MLRM model with potential predictors
+ 
+>model <- rating~watched + watching + wantWatch + votes 
+> fit<- lm(model,train)
+> fit 
+#multicollinearity check
+
+> library(VIF)
+> install.packages("faraway")
+> library(faraway)
+model_2 = lm(rating~watching+duration,data = train)
+ > faraway::vif(model_2)
+watching duration 
+1.007485 1.007485 
+ 
+ since the variance inflationary factor (vif) is less than 5 for duration and watching 
+ there is no multicollinearity among these explanatory variables.
+ #to check the skewness of columns watched and watching
+> install.packages("e1071")
+> library(e1071)   
+> replace(train$watched, 0,1)
+> skewness(test$watched)
+>fit_0 <- lm(rating~.,data = train)
+>predictions <- predict(fit, test)
+>prediction.probabilities <- predictions$posterior[,2]
+ predicted.classes <- predictions$df2 
+ observed.classes <- test$watching
+  cor.test(x= rating, y= watched, method = "pearson", data = train)
+
+	Pearson's product-moment correlation
+
+data:  rating and watched
+t = 38.991, df = 6940, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+  0.4044197 0.4430177
+sample estimates:
+  cor 
+0.4239112 
+
+> cor.test(x= rating, y= watching, method = "pearson", data = train)
+
+Pearson's product-moment correlation
+
+data:  rating and watching
+t = 22.952, df = 7027, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.2421943 0.2856921
+sample estimates:
+      cor 
+0.2640775 
+
+> cor.test(x= rating, y= duration, method = "pearson", data = train)
+
+	Pearson's product-moment correlation
+
+data:  rating and duration
+t = 23.833, df = 7027, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+  0.2516985 0.2949604
+sample estimates:
+  cor 
+0.2734678 
+
+> cor.test(x= rating, y= votes, method = "pearson", data = train)
+
+Pearson's product-moment correlation
+
+data:  rating and votes
+t = 37.319, df = 7027, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.3870097 0.4260359
+sample estimates:
+      cor 
+0.4067084 
+#relation between tags and rating:
+chisq.test(train$rating, train$tags)
+
+	Pearson's Chi-squared test
+
+data:  train$rating and train$tags
+X-squared = 1863333, df = 1866266, p-value = 0.9356
+#since we have a p value of 0.93 
+#we accept the null hypothesis thus we can say that the two variables are inter dependent.
+model_final <- lm(rating~ watched+watching+votes+duration, data = train)
+> model_final
+
+Call:
+  lm(formula = rating ~ watched + watching + votes + duration, 
+     data = train)
+
+Coefficients:
+  (Intercept)      watched     watching        votes     duration  
+2.7357947    0.0002762    0.0002882   -0.0003371    0.0087520  
+#linear regression analysis of watched,watching,votes,wantWatch, and eps on rating 
+#to find out which variables are more suited as predictors
+model_final <- lm(rating~ watched+watching+votes+duration+wantWatch+eps, data = train)
+> model_final
+
+Call:
+  lm(formula = rating ~ watched + watching + votes + duration + 
+       wantWatch + eps, data = train)
+
+Coefficients:
+  (Intercept)      watched     watching        votes     duration    wantWatch          eps  
+2.5745971    0.0001918    0.0001169   -0.0002805    0.0080397    0.0002318    0.0057915  
+#checking for multicollinearity
+vif(model_final)
+watched   watching      votes   duration  wantWatch        eps 
+137.969769   4.524734 156.934500   1.061328   3.523679   1.214544 
+#since watched and votes are showing severe multicollinearity they should be dropped
+
+#now, after removing explanatory variables with high multicollinearity we run the regression again
+model_final_1 <- lm(rating~ watching+duration+wantWatch+eps, data = train)
+> model_final_1
+
+Call:
+  lm(formula = rating ~ watching + duration + wantWatch + eps, 
+     data = train)
+
+Coefficients:
+  (Intercept)     watching     duration    wantWatch          eps  
+2.612e+00   -8.972e-05    8.557e-03    2.158e-04    5.373e-03  
+
+> summary(model_final_1)
+
+Call:
+  lm(formula = rating ~ watching + duration + wantWatch + eps, 
+     data = train)
+
+Residuals:
+  Min       1Q   Median       3Q      Max 
+-2.68367 -0.54356  0.05835  0.56940  1.74169 
+
+Coefficients:
+  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  2.612e+00  2.356e-02 110.844  < 2e-16 ***
+  watching    -8.972e-05  1.978e-05  -4.537 6.09e-06 ***
+  duration     8.557e-03  6.771e-04  12.637  < 2e-16 ***
+  wantWatch    2.158e-04  9.685e-06  22.281  < 2e-16 ***
+  eps          5.373e-03  1.110e-03   4.839 1.42e-06 ***
+  ---
+  Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.7238 on 1753 degrees of freedom
+Multiple R-squared:  0.3651,	Adjusted R-squared:  0.3636 
+F-statistic:   252 on 4 and 1753 DF,  p-value: < 2.2e-16
+
